@@ -132,9 +132,9 @@
     <p class="tagline">Local-LLM Suricata alert triage for homelabs. Reduce alert noise without sending data to the cloud.</p>
 
     <div class="status" style="border-left-color: #2ea043;">
-      <strong style="color: #2ea043;">v0.1 available.</strong> Free and open source. Two-tier
-      classification with a local LLM. Tested on a production homelab
-      processing 6,000–13,000 alerts per hour.
+      <strong style="color: #2ea043;">v0.2 available.</strong> Free and open source. Two-tier
+      classification with a local LLM, hardened against prompt injection.
+      Tested on a production homelab processing 6,000–13,000 alerts per hour.
     </div>
 
     <img src="dashboard.png" alt="Triagewall dashboard showing 99.2% prefilter ratio across 417,514 alerts in 24 hours" class="screenshot">
@@ -148,8 +148,14 @@
       long tail to a local Ollama model for classification. On a typical
       homelab, the prefilter handles 99%+ of alerts after a day of tuning.
       The LLM sees only the genuinely interesting traffic.</p>
-      <p>Free and AGPL-3.0. Runs on your hardware. No telemetry. Default model
-      is Mistral 7B running on any GPU with 8GB+ VRAM.</p>
+      <p>v0.2 hardens the LLM stage against prompt injection: a canary token
+      detects in-band tampering, strict response-schema validation rejects
+      out-of-spec output, and 16 attacker-controlled alert fields are
+      base64-encapsulated with explicit boundary markers so injected text
+      can't escape the data envelope.</p>
+      <p>Free and AGPL-3.0. Runs on your hardware. No telemetry. Default
+      model is Foundation-Sec-8B-Instruct (Cisco's security-domain LLM),
+      running on any GPU with 8GB+ VRAM.</p>
     </div>
 
     <div class="install">
@@ -169,8 +175,8 @@ docker compose up -d</code></pre>
           <div class="metric-label">prefilter ratio</div>
         </div>
         <div class="metric">
-          <div class="metric-value">1–3s</div>
-          <div class="metric-label">LLM latency (Mistral 7B / RTX 4060)</div>
+          <div class="metric-value">7–10s</div>
+          <div class="metric-label">LLM latency (Foundation-Sec-8B / RTX 4060)</div>
         </div>
         <div class="metric">
           <div class="metric-value">&lt;2 min</div>
@@ -186,7 +192,8 @@ docker compose up -d</code></pre>
     <nav>
       <a href="https://github.com/aaronphifer/triagewall">View on GitHub</a>
       <a href="https://github.com/aaronphifer/triagewall#quick-start">Install in 5 minutes</a>
-      <a href="https://github.com/aaronphifer/triagewall/blob/master/ROADMAP.md">v0.2 roadmap</a>
+      <a href="https://github.com/aaronphifer/triagewall/releases/tag/v0.2">v0.2 release notes</a>
+      <a href="https://github.com/aaronphifer/triagewall/tree/main/docs/experiments">Benchmark &amp; experiment docs</a>
       <a href="mailto:hello@triagewall.io">Get in touch</a>
     </nav>
 
