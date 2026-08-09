@@ -1,168 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Writeups — Triagewall</title>
-  <meta name="description" content="Notes on building Triagewall, a local-LLM Suricata alert triage tool for homelabs.">
-  <meta property="og:title" content="Triagewall Writeups">
-  <meta property="og:description" content="Notes on building Triagewall, a local-LLM Suricata alert triage tool for homelabs.">
+  <meta name="description" content="Architecture notes, security experiments, and operational lessons from building Triagewall in public.">
+  <meta name="theme-color" content="#12141f">
+  <meta property="og:title" content="Triagewall writeups">
+  <meta property="og:description" content="Architecture notes, security experiments, and operational lessons from building Triagewall in public.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://triagewall.io/posts">
   <link rel="canonical" href="https://triagewall.io/posts">
+  <link rel="icon" href="/assets/triagewall-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/site.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      background: #0d1117;
-      color: #c9d1d9;
-      line-height: 1.6;
+    .writing-header { padding-block: 88px 55px; border-bottom: 1px solid var(--line); }
+    .writing-header h1 { margin-bottom: 14px; font-size: clamp(42px, 6vw, 70px); }
+    .writing-header > p:not(.eyebrow) { max-width: 650px; color: var(--muted); font-size: 16px; }
+    .post-list { padding-block: 20px 100px; }
+    .post-card { display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; gap: 30px; align-items: start; padding: 34px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+    .post-card time { color: var(--faint); font: 10px var(--mono); }
+    .post-card h2 { margin: -5px 0 8px; font-size: clamp(21px, 2.5vw, 29px); transition: color 140ms ease; }
+    .post-card p { max-width: 700px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .post-card > span { color: var(--violet); font-size: 22px; transition: transform 140ms ease; }
+    .post-card:hover h2 { color: #c6bfff; }
+    .post-card:hover > span { transform: translateX(4px); }
+    @media (max-width: 700px) {
+      .writing-header { padding-block: 58px 35px; }
+      .post-card { grid-template-columns: 1fr auto; gap: 12px; }
+      .post-card time { grid-column: 1 / -1; }
     }
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 56px 24px 96px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 48px;
-      font-size: 0.9rem;
-    }
-    .topbar a { color: #58a6ff; text-decoration: none; }
-    .topbar a:hover { color: #79c0ff; }
-    h1 {
-      font-size: 2.1rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 12px;
-      color: #f0f6fc;
-      line-height: 1.2;
-    }
-    h2 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #f0f6fc;
-      margin: 40px 0 16px;
-      letter-spacing: -0.01em;
-    }
-    .post-meta {
-      color: #6e7681;
-      font-size: 0.9rem;
-      margin-bottom: 32px;
-    }
-    p { margin-bottom: 18px; }
-    ul, ol { margin: 0 0 18px 24px; }
-    li { margin-bottom: 8px; }
-    a { color: #58a6ff; }
-    a:hover { color: #79c0ff; }
-    strong { color: #f0f6fc; }
-    pre {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      padding: 16px 20px;
-      overflow-x: auto;
-      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-      font-size: 0.85rem;
-      line-height: 1.5;
-      margin-bottom: 20px;
-    }
-    pre code { color: #c9d1d9; background: none; padding: 0; }
-    code {
-      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-      background: #161b22;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 0.85em;
-      color: #c9d1d9;
-    }
-    blockquote {
-      border-left: 3px solid #d29922;
-      background: #161b22;
-      padding: 14px 20px;
-      margin: 0 0 20px;
-      border-radius: 0 4px 4px 0;
-      color: #e6edf3;
-      font-style: italic;
-    }
-    blockquote p { margin-bottom: 0; }
-    blockquote.editor-note {
-      border-left-color: #6e7681;
-      color: #8b949e;
-      font-size: 0.92rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 24px;
-      font-size: 0.9rem;
-    }
-    th, td {
-      border: 1px solid #30363d;
-      padding: 8px 12px;
-      text-align: left;
-      vertical-align: top;
-    }
-    th { background: #161b22; color: #f0f6fc; font-weight: 600; }
-    tr:nth-child(even) td { background: #0f141a; }
-    hr {
-      border: none;
-      border-top: 1px solid #30363d;
-      margin: 48px 0 32px;
-    }
-    .author-bio { color: #8b949e; font-size: 0.92rem; }
-    .author-bio h2 { font-size: 1.1rem; color: #c9d1d9; }
-    footer {
-      color: #6e7681;
-      font-size: 0.85rem;
-      margin-top: 56px;
-      padding-top: 24px;
-      border-top: 1px solid #21262d;
-    }
-    footer a { color: #6e7681; }
-    /* blog index */
-    .post-list { list-style: none; margin: 0; padding: 0; }
-    .post-list li {
-      border-bottom: 1px solid #21262d;
-      padding: 24px 0;
-      margin: 0;
-    }
-    .post-list h2 { margin: 0 0 6px; font-size: 1.25rem; }
-    .post-list h2 a { text-decoration: none; }
-    .post-list .date { color: #6e7681; font-size: 0.85rem; margin-bottom: 8px; }
-    .post-list .desc { color: #8b949e; font-size: 0.95rem; margin: 0; }
   </style>
 </head>
 <body>
-  <main>
-  <div class="topbar">
-    <a href="/">← triagewall.io</a>
-    <a href="https://github.com/aaronphifer/triagewall">GitHub</a>
-  </div>
-  <h1>Writeups</h1>
-  <p class="post-meta">Notes on building Triagewall in public — architecture, experiments, and the things that broke.</p>
-  <ul class="post-list">
-    <li>
-      <h2><a href="/posts/behavioral-baselining">Adding a Detection Layer That Prompt Injection Can&rsquo;t Touch</a></h2>
-      <div class="date">June 11, 2026</div>
-      <p class="desc">Behavioral baselining on the bare Suricata alert stream — no flow logs, no extra telemetry. An injection-resistant detection layer, and what calibrating it on 1.5M real alerts taught me.</p>
-    </li>
-    <li>
-      <h2><a href="/posts/prompt-injection-phase-2">I Found a Prompt Injection in My Own IDS Triage Tool. Here&rsquo;s What Actually Stopped It.</a></h2>
-      <div class="date">May 25, 2026</div>
-      <p class="desc">I attacked my own LLM-based Suricata triage tool, found a real URL injection vulnerability, and the obvious fix didn&rsquo;t work. Here&rsquo;s what did.</p>
-    </li>
-    <li>
-      <h2><a href="/posts/cutting-suricata-alerts">How I Cut 13,000 Suricata Alerts an Hour Down to 200 Worth Reading</a></h2>
-      <div class="date">May 18, 2026</div>
-      <p class="desc">Building a two-tier local-LLM triage layer for a homelab IDS — architecture, the numbers, and what broke when I tested it on a 2018 laptop.</p>
-    </li>
-  </ul>
-    <footer>
-      <p>Built in public. <a href="https://github.com/aaronphifer/triagewall">Source on GitHub</a> · <a href="mailto:hello@triagewall.io">hello@triagewall.io</a></p>
-    </footer>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Triagewall home">
+      <img src="/assets/triagewall-mark.svg" alt="" width="28" height="28">
+      <span>Triagewall</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="/#product">Product</a>
+      <a href="/#architecture">Architecture</a>
+      <a href="/#evidence">Evidence</a>
+      <a href="/posts" aria-current="page">Writeups</a>
+    </nav>
+    <a class="button button-small button-secondary" href="https://github.com/aaronphifer/triagewall">GitHub <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main id="main">
+    <section class="writing-header" aria-labelledby="writing-title">
+      <p class="eyebrow">Built in public</p>
+      <h1 id="writing-title">Writeups</h1>
+      <p>Architecture decisions, adversarial experiments, and operational lessons—including the approaches that failed before the shipped design worked.</p>
+    </section>
+    <section class="post-list" aria-label="Published writeups">
+      <a class="post-card" href="/posts/behavioral-baselining">
+        <time datetime="2026-06-11">June 11, 2026</time>
+        <div>
+          <h2>Adding a detection layer that prompt injection can’t touch</h2>
+          <p>Behavioral baselining on the bare Suricata alert stream, what calibrating it on 1.5 million real alerts taught us, and where the signal remains limited.</p>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="post-card" href="/posts/prompt-injection-phase-2">
+        <time datetime="2026-05-25">May 25, 2026</time>
+        <div>
+          <h2>I found a prompt injection in my own IDS triage tool</h2>
+          <p>The real URL injection vulnerability, why the obvious fix did not hold, and the field-isolation design that replaced it.</p>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="post-card" href="/posts/cutting-suricata-alerts">
+        <time datetime="2026-05-18">May 18, 2026</time>
+        <div>
+          <h2>How I cut 13,000 Suricata alerts an hour down to 200 worth reading</h2>
+          <p>The original two-tier architecture, production numbers, and what happened when it was tested on a 2018 laptop.</p>
+        </div>
+        <span aria-hidden="true">→</span>
+      </a>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="/"><img src="/assets/triagewall-mark.svg" alt="" width="24" height="24"><span>Triagewall</span></a>
+    <p>Architecture, experiments, and build notes.</p>
+    <nav aria-label="Footer navigation"><a href="/">Home</a><a href="https://github.com/aaronphifer/triagewall">Source</a><a href="mailto:hello@triagewall.io">Contact</a></nav>
+    <span>AGPL-3.0 · No telemetry</span>
+  </footer>
 </body>
 </html>
