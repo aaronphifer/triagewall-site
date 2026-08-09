@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Command Center roadmap - Triagewall</title>
+  <meta name="description" content="The Triagewall Command Center roadmap: a v0.4 analyst workbench followed by a v0.5 lab-to-production workflow for measured, reviewable changes.">
+  <meta name="theme-color" content="#12141f">
+  <meta property="og:title" content="Triagewall Command Center">
+  <meta property="og:description" content="Investigate alerts, manage operator-owned policy, and test candidate changes before production.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://triagewall.io/command-center/">
+  <meta property="og:image" content="https://triagewall.io/dashboard.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://triagewall.io/command-center/">
+  <link rel="icon" href="/assets/triagewall-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Triagewall home">
+      <img src="/assets/triagewall-mark.svg" alt="" width="28" height="28">
+      <span>Triagewall</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="/#product">Product</a>
+      <a href="/#architecture">Architecture</a>
+      <a href="/#evidence">Evidence</a>
+      <a href="/command-center/" aria-current="page">Command Center</a>
+      <a href="/posts">Writeups</a>
+    </nav>
+    <a class="button button-small button-secondary" href="https://github.com/aaronphifer/triagewall">GitHub <span aria-hidden="true">&nearr;</span></a>
+  </header>
+
+  <main id="main" class="command-center-page">
+    <section class="command-hero" aria-labelledby="command-title">
+      <div class="command-hero-copy">
+        <div class="tag-row" aria-label="Roadmap status">
+          <span class="tag tag-accent">v0.4 in development</span>
+          <span class="tag">v0.5 planned</span>
+        </div>
+        <p class="eyebrow">Triagewall Command Center</p>
+        <h1 id="command-title">Investigate the signal.<br>Control what happens next.</h1>
+        <p class="hero-lede">The next Triagewall releases turn the alert queue into an operator workbench, then add a guarded lab-to-production path for policy, enrichment, and model changes.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="https://github.com/aaronphifer/triagewall/pull/66">Follow v0.4 <span aria-hidden="true">&nearr;</span></a>
+          <a class="button button-secondary" href="https://github.com/aaronphifer/triagewall/releases/tag/v0.3">Current release: v0.3</a>
+        </div>
+      </div>
+      <div class="command-principle" aria-label="Command Center operating principle">
+        <p class="card-label">Operating principle</p>
+        <blockquote>Make every change inspectable before it becomes operational.</blockquote>
+        <div class="principle-flow" aria-hidden="true">
+          <span>Observe</span><i></i><span>Draft</span><i></i><span>Validate</span><i></i><span>Activate</span>
+        </div>
+        <p>Historical evidence stays immutable. Production changes require an explicit operator action and leave a revisioned audit trail.</p>
+      </div>
+    </section>
+
+    <section class="section roadmap-section" aria-labelledby="roadmap-title">
+      <div class="section-heading compact-heading">
+        <p class="eyebrow">Release path</p>
+        <h2 id="roadmap-title">One foundation, two deliberate releases.</h2>
+        <p>v0.4 establishes the investigation and configuration surfaces. v0.5 builds the experiment and promotion workflow on top of those versioned controls.</p>
+      </div>
+
+      <div class="release-grid">
+        <article class="release-card release-card-active">
+          <div class="release-card-head">
+            <div><span>v0.4</span><strong>Analyst workbench</strong></div>
+            <em>In development</em>
+          </div>
+          <p>A source-aware command surface for moving from model verdict to evidence, operator decision, and carefully scoped configuration.</p>
+          <ul class="feature-list">
+            <li><strong>Rich investigations</strong><span>Alert evidence, reasoning, recurrence, related activity, source context, and filtered navigation.</span></li>
+            <li><strong>Operator decisions</strong><span>Agree, correct, mark uncertain, and preserve feedback as reviewable evidence.</span></li>
+            <li><strong>Prefilter rule builder</strong><span>Draft scoped rules from an alert, preview historical impact and exact changes, then activate explicitly.</span></li>
+            <li><strong>Private asset enrichment</strong><span>Manage exact-IP hostname, role, criticality, exposure, ports, and notes without editing files by hand.</span></li>
+            <li><strong>Versioned configuration</strong><span>Validation, atomic activation, optimistic locking, last-known-good state, rollback, and audit history.</span></li>
+          </ul>
+        </article>
+
+        <article class="release-card">
+          <div class="release-card-head">
+            <div><span>v0.5</span><strong>Lab to production</strong></div>
+            <em>Planned</em>
+          </div>
+          <p>An isolated evaluation surface for measuring candidate behavior before it is allowed to influence live triage.</p>
+          <ul class="feature-list">
+            <li><strong>Replay in isolation</strong><span>Evaluate candidate rules, enrichment, prompts, models, and thresholds against historical or controlled alert sets.</span></li>
+            <li><strong>Compare outcomes</strong><span>Place the production baseline beside the candidate: verdict movement, uncertainty, latency, cost, and regressions.</span></li>
+            <li><strong>Promote deliberately</strong><span>Move an approved revision into production through one visible, authenticated, audited action.</span></li>
+            <li><strong>Rollback cleanly</strong><span>Retain the prior production revision and make recovery a normal workflow, not a file-repair exercise.</span></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section safety-section" aria-labelledby="safety-title">
+      <div class="section-heading compact-heading">
+        <p class="eyebrow">Control boundary</p>
+        <h2 id="safety-title">A configuration UI is an operational control plane.</h2>
+        <p>The Command Center will treat policy writes differently from ordinary alert review. Convenience does not erase the need for authorization, provenance, or recovery.</p>
+      </div>
+      <div class="safety-grid">
+        <article><span>01</span><strong>Off by default</strong><p>Configuration mutation requires an explicit deployment setting and a dedicated write scope.</p></article>
+        <article><span>02</span><strong>Preview before activation</strong><p>The operator sees validation results, exact changes, affected historical alerts, and broad-match warnings.</p></article>
+        <article><span>03</span><strong>Future events only</strong><p>New policy or asset definitions do not rewrite old verdicts or their captured asset snapshots.</p></article>
+        <article><span>04</span><strong>No container control</strong><p>The dashboard does not receive a Docker socket or permission to restart the ingest pipeline.</p></article>
+      </div>
+    </section>
+
+    <section class="section lifecycle-section" aria-labelledby="lifecycle-title">
+      <div class="section-heading compact-heading">
+        <p class="eyebrow">v0.5 workflow</p>
+        <h2 id="lifecycle-title">Lab work cannot silently become production behavior.</h2>
+      </div>
+      <ol class="lifecycle-flow">
+        <li><span>01</span><div><strong>Create a candidate</strong><p>Fork the active production revision into an isolated draft.</p></div></li>
+        <li><span>02</span><div><strong>Run the evaluation</strong><p>Replay a controlled dataset without touching live checkpoints or verdicts.</p></div></li>
+        <li><span>03</span><div><strong>Review the delta</strong><p>Inspect changed decisions, regressions, coverage, latency, and integrity results.</p></div></li>
+        <li><span>04</span><div><strong>Promote or reject</strong><p>Explicitly activate the candidate or leave production unchanged.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="final-cta" aria-labelledby="command-cta-title">
+      <img src="/assets/triagewall-mark.svg" alt="" width="54" height="54">
+      <p class="eyebrow">Build in public</p>
+      <h2 id="command-cta-title">The direction is public. The claims stay scoped.</h2>
+      <p>v0.3 is the current stable release. Command Center functionality remains development work until it is implemented, evaluated, reviewed, and released.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="https://github.com/aaronphifer/triagewall/pull/66">Review the v0.4 foundation <span aria-hidden="true">&nearr;</span></a>
+        <a class="button button-secondary" href="https://github.com/aaronphifer/triagewall/issues">Join the discussion</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="/">
+      <img src="/assets/triagewall-mark.svg" alt="" width="24" height="24">
+      <span>Triagewall</span>
+    </a>
+    <p>Local-first alert triage for self-hosted security operations.</p>
+    <nav aria-label="Footer navigation">
+      <a href="https://github.com/aaronphifer/triagewall">Source</a>
+      <a href="https://github.com/aaronphifer/triagewall/releases">Releases</a>
+      <a href="/command-center/">Command Center</a>
+      <a href="/posts">Writeups</a>
+    </nav>
+    <span>AGPL-3.0 &middot; No telemetry</span>
+  </footer>
+</body>
+</html>
